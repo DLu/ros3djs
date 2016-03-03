@@ -60,5 +60,7 @@ ROS3D.SceneNode.prototype.updatePose = function(pose) {
 };
 
 ROS3D.SceneNode.prototype.unsubscribeTf = function() {
+  if(this.message){
   this.tfClient.unsubscribe(this.message.header.frame_id, this.tfUpdate);
+  }
 };
