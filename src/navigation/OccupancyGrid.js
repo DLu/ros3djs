@@ -2,6 +2,19 @@
  * @author Russell Toris - rctoris@wpi.edu
  */
 
+function get_color(data, color) {
+  var val;
+  if (data === 100){
+    val = 0;
+  } else if (data === 0) {
+    val = 255;
+  } else {
+    val = 127;
+  }
+  
+  return [ (val * color.r) / 255, (val * color.g) / 255, (val * color.b) / 255, 255 ];
+}
+
 /**
  * An OccupancyGrid can convert a ROS occupancy grid message into a THREE object.
  *
@@ -37,24 +50,17 @@ ROS3D.OccupancyGrid = function(options) {
       // determine the value
       var data = message.data[mapI];
       var val;
-      if (data === 100) {
-        val = 0;
-      } else if (data === 0) {
-        val = 255;
-      } else {
-        val = 127;
-      }
-
       // determine the index into the image data array
       var i = (col + (row * width)) * 4;
-      // r
-      imageData.data[i] = (val * color.r) / 255;
-      // g
-      imageData.data[++i] = (val * color.g) / 255;
-      // b
-      imageData.data[++i] = (val * color.b) / 255;
-      // a
-      imageData.data[++i] = 255;
+      var rgba;
+      if(color.r){ rgba= get_color(data, color);}else{
+        rgba = color(data);
+      }
+
+      imageData.data[i] = rgba[0];
+      imageData.data[++i] = rgba[1];
+      imageData.data[++i] = rgba[2];
+      imageData.data[++i] = rgba[3];
     }
   }
   context.putImageData(imageData, 0, 0);
@@ -64,7 +70,7 @@ ROS3D.OccupancyGrid = function(options) {
 
   var material = new THREE.MeshBasicMaterial({
     map : texture,
-    transparent : opacity < 1.0,
+    transparent : true,
     opacity : opacity
   });
   material.side = THREE.DoubleSide;
